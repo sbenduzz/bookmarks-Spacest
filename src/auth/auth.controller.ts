@@ -19,10 +19,6 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Post('signup')
   signup(@Body() dto: AuthDto) {
-    console.log({
-      dto,
-    });
-
     return this.authService.signup(dto);
   }
 
@@ -30,11 +26,5 @@ export class AuthController {
   @Post('signin')
   signin(@Body() dto: AuthDto) {
     return this.authService.signin(dto);
-  }
-
-  @UseGuards(AuthGuard)
-  @Get('profile')
-  getProfile(@Request() req) {
-    return req.user;
   }
 }
