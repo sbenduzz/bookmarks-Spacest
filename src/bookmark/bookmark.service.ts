@@ -5,12 +5,51 @@ import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class BookmarkService {
   constructor(private prisma: PrismaService) {}
+
   async getBookmarks(userId: number) {
     return await this.prisma.bookmark.findMany({
       where: {
         user_id: userId,
       },
     });
+  }
+
+  async getBookmarksWithPagination(
+    userId: number,
+    pageNumber: number,
+    pageSize: number,
+  ) {
+    const totalBookmarks = await this.prisma.bookmark.count({
+      where: {
+        user_id: userId,
+      },
+    });
+
+    const totalPages = Math.ceil(totalBookmarks / pageSize);
+
+    if (pageNumber > totalPages) {
+      return {
+        data: [],
+        pageNumber,
+        totalPages,
+      };
+    }
+
+    const skip = (pageNumber - 1) * pageSize;
+
+    const requestedBookmars = await this.prisma.bookmark.findMany({
+      where: {
+        user_id: userId,
+      },
+      skip: skip,
+      take: pageSize,
+    });
+
+    return {
+      data: requestedBookmars,
+      pageNumber,
+      totalPages,
+    };
   }
 
   async getBookmark(userId: number, bookmarkId: number) {

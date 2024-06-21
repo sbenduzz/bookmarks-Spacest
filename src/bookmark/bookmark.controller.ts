@@ -7,12 +7,14 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/guards';
 import { BookmarkService } from './bookmark.service';
 import { CreateBookmarkDto, EditBookmarkDto } from './dto';
+import { IntOrUndefinedPipe } from './pipe';
 
 @UseGuards(AuthGuard)
 @Controller('bookmarks')
@@ -20,10 +22,21 @@ export class BookmarkController {
   constructor(private bookmarkService: BookmarkService) {}
 
   @Get()
-  getBookmarks(@Request() req) {
+  getBookmarks(
+    @Request() req,
+    @Query('page', IntOrUndefinedPipe)
+    pageNumber?: number | undefined,
+    @Query('size', IntOrUndefinedPipe) pageSize?: number | undefined,
+  ) {
     const userId = req.user.id;
 
-    return this.bookmarkService.getBookmarks(userId);
+    if (pageNumber !== undefined && pageSize !== undefined)
+      return this.bookmarkService.getBookmarksWithPagination(
+        userId,
+        pageNumber,
+        pageSize,
+      );
+    else return this.bookmarkService.getBookmarks(userId);
   }
 
   @Get(':id')
