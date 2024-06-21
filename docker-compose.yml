@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  db: 
+    build: db
+    ports:
+      - 3306:3306
+    networks:
+      - spacest-net
+
+networks:
+  spacest-net:

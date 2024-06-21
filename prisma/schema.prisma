@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model bookmark {
+  id          Int       @id @default(autoincrement())
+  title       String    @db.VarChar(128)
+  description String?   @db.Text
+  url         String    @db.VarChar(1024)
+  user_id     Int?
+  created_at  DateTime  @default(now()) @db.DateTime(0)
+  updated_at  DateTime? @db.DateTime(0)
+  user        user?     @relation(fields: [user_id], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@map("bookmarks")
+}
+
+model user {
+  id         Int        @id @default(autoincrement())
+  email      String     @unique @db.VarChar(512)
+  pwdHash    String
+  created_at DateTime   @default(now()) @db.DateTime(0)
+  updated_at DateTime?  @db.DateTime(0)
+  bookmarks  bookmark[]
+
+  @@map("user")
+}
