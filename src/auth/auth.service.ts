@@ -1,7 +1,14 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import {
+  PrismaClientInitializationError,
+  PrismaClientKnownRequestError,
+} from '@prisma/client/runtime/library';
 import { PrismaService } from '../prisma/prisma.service';
 import * as argon from 'argon2';
 import { AuthDto } from './dto';
@@ -35,34 +42,48 @@ export class AuthService {
           throw new ForbiddenException('Credentials taken');
         }
       }
+
+      if (error instanceof PrismaClientInitializationError) {
+        throw new ServiceUnavailableException(
+          'Service is unavailable!',
+        );
+      }
       throw error;
     }
   }
 
   async signin(dto: AuthDto): Promise<{ access_token: string }> {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email: dto.email,
-      },
-    });
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          email: dto.email,
+        },
+      });
 
-    if (!user) throw new ForbiddenException('User does not exist!');
+      if (!user) throw new ForbiddenException('User does not exist!');
 
-    // verify that the submitted pwd matches
-    const pwdMatch = await argon.verify(user.pwdHash, dto.password);
+      // verify that the submitted pwd matches
+      const pwdMatch = await argon.verify(user.pwdHash, dto.password);
 
-    if (!pwdMatch) throw new ForbiddenException('Wrong password!');
+      if (!pwdMatch) throw new ForbiddenException('Wrong password!');
 
-    const payload = {
-      sub: user.id,
-      email: user.email,
-    };
+      const payload = {
+        sub: user.id,
+        email: user.email,
+      };
 
-    return {
-      access_token: await this.jwt.signAsync(payload, {
-        expiresIn: '10m',
-        secret: this.config.get('JWT_SECRET'),
-      }),
-    };
+      return {
+        access_token: await this.jwt.signAsync(payload, {
+          expiresIn: '10m',
+          secret: this.config.get('JWT_SECRET'),
+        }),
+      };
+    } catch (error) {
+      if (error instanceof PrismaClientInitializationError) {
+        throw new ServiceUnavailableException(
+          'Service is unavailable!',
+        );
+      }
+    }
   }
 }

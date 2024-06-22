@@ -1,6 +1,11 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { CreateBookmarkDto, EditBookmarkDto } from './dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { PrismaClientInitializationError } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class BookmarkService {
@@ -19,46 +24,63 @@ export class BookmarkService {
     pageNumber: number,
     pageSize: number,
   ) {
-    const totalBookmarks = await this.prisma.bookmark.count({
-      where: {
-        user_id: userId,
-      },
-    });
+    try {
+      const totalBookmarks = await this.prisma.bookmark.count({
+        where: {
+          user_id: userId,
+        },
+      });
 
-    const totalPages = Math.ceil(totalBookmarks / pageSize);
+      const totalPages = Math.ceil(totalBookmarks / pageSize);
 
-    if (pageNumber > totalPages) {
+      if (pageNumber > totalPages) {
+        return {
+          data: [],
+          pageNumber,
+          totalPages,
+        };
+      }
+
+      const skip = (pageNumber - 1) * pageSize;
+
+      const requestedBookmars = await this.prisma.bookmark.findMany({
+        where: {
+          user_id: userId,
+        },
+        skip: skip,
+        take: pageSize,
+      });
+
       return {
-        data: [],
+        data: requestedBookmars,
         pageNumber,
         totalPages,
       };
+    } catch (error) {
+      if (error instanceof PrismaClientInitializationError) {
+        throw new ServiceUnavailableException(
+          'Service is unavailable!',
+        );
+      }
     }
-
-    const skip = (pageNumber - 1) * pageSize;
-
-    const requestedBookmars = await this.prisma.bookmark.findMany({
-      where: {
-        user_id: userId,
-      },
-      skip: skip,
-      take: pageSize,
-    });
-
-    return {
-      data: requestedBookmars,
-      pageNumber,
-      totalPages,
-    };
   }
 
   async getBookmark(userId: number, bookmarkId: number) {
-    return await this.prisma.bookmark.findMany({
-      where: {
-        user_id: userId,
-        id: bookmarkId,
-      },
-    });
+    try {
+      return await this.prisma.bookmark.findMany({
+        where: {
+          user_id: userId,
+          id: bookmarkId,
+        },
+      });
+    } catch (error) {
+      if (error instanceof PrismaClientInitializationError) {
+        throw new ServiceUnavailableException(
+          'Service is unavailable!',
+        );
+      }
+      throw error;
+    }
   }
 
   async createBookmark(
@@ -77,6 +99,11 @@ export class BookmarkService {
 
       return bookmark;
     } catch (error) {
+      if (error instanceof PrismaClientInitializationError) {
+        throw new ServiceUnavailableException(
+          'Service is unavailable!',
+        );
+      }
       throw error;
     }
   }
@@ -86,45 +113,63 @@ export class BookmarkService {
     bookmarkId: number,
     editBookmarkDto: EditBookmarkDto,
   ) {
-    const bookmark = this.prisma.bookmark.findFirst({
-      where: {
-        id: bookmarkId,
-        user_id: userId,
-      },
-    });
+    try {
+      const bookmark = this.prisma.bookmark.findFirst({
+        where: {
+          id: bookmarkId,
+          user_id: userId,
+        },
+      });
 
-    if (!bookmark) {
-      throw new ForbiddenException("Can't access this resource!");
+      if (!bookmark) {
+        throw new ForbiddenException("Can't access this resource!");
+      }
+
+      return this.prisma.bookmark.update({
+        where: {
+          id: bookmarkId,
+        },
+        data: {
+          title: editBookmarkDto.title,
+          description: editBookmarkDto.description,
+          url: editBookmarkDto.url,
+        },
+      });
+    } catch (error) {
+      if (error instanceof PrismaClientInitializationError) {
+        throw new ServiceUnavailableException(
+          'Service is unavailable!',
+        );
+      }
+      throw error;
     }
-
-    return this.prisma.bookmark.update({
-      where: {
-        id: bookmarkId,
-      },
-      data: {
-        title: editBookmarkDto.title,
-        description: editBookmarkDto.description,
-        url: editBookmarkDto.url,
-      },
-    });
   }
 
   deleteBookmark(userId: number, bookmarkId: number) {
-    const bookmark = this.prisma.bookmark.findFirst({
-      where: {
-        id: bookmarkId,
-        user_id: userId,
-      },
-    });
+    try {
+      const bookmark = this.prisma.bookmark.findFirst({
+        where: {
+          id: bookmarkId,
+          user_id: userId,
+        },
+      });
 
-    if (!bookmark) {
-      throw new ForbiddenException("Can't access this resource!");
+      if (!bookmark) {
+        throw new ForbiddenException("Can't access this resource!");
+      }
+
+      return this.prisma.bookmark.delete({
+        where: {
+          id: bookmarkId,
+        },
+      });
+    } catch (error) {
+      if (error instanceof PrismaClientInitializationError) {
+        throw new ServiceUnavailableException(
+          'Service is unavailable!',
+        );
+      }
+      throw error;
     }
-
-    return this.prisma.bookmark.delete({
-      where: {
-        id: bookmarkId,
-      },
-    });
   }
 }
