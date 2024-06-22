@@ -12,6 +12,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import * as argon from 'argon2';
 import { AuthDto } from './dto';
+import { user } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -53,25 +54,35 @@ export class AuthService {
   }
 
   async signin(dto: AuthDto): Promise<{ access_token: string }> {
+    let user: user;
+
     try {
-      const user = await this.prisma.user.findUnique({
+      user = await this.prisma.user.findUnique({
         where: {
           email: dto.email,
         },
       });
+    } catch (error) {
+      if (error instanceof PrismaClientInitializationError) {
+        throw new ServiceUnavailableException(
+          'Service is unavailable!',
+        );
+      }
+    }
 
-      if (!user) throw new ForbiddenException('User does not exist!');
+    if (!user) throw new ForbiddenException('User does not exist!');
 
-      // verify that the submitted pwd matches
-      const pwdMatch = await argon.verify(user.pwdHash, dto.password);
+    // verify that the submitted pwd matches
+    const pwdMatch = await argon.verify(user.pwdHash, dto.password);
 
-      if (!pwdMatch) throw new ForbiddenException('Wrong password!');
+    if (!pwdMatch) throw new ForbiddenException('Wrong password!');
 
-      const payload = {
-        sub: user.id,
-        email: user.email,
-      };
+    const payload = {
+      sub: user.id,
+      email: user.email,
+    };
 
+    try {
       return {
         access_token: await this.jwt.signAsync(payload, {
           expiresIn: '10m',
