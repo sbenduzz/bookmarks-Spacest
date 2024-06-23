@@ -85,11 +85,15 @@ bookmarks-spacest
 3. **Create the `.env` file**:
    The `.env` file contains environment variables needed for the project. Create a `.env` file in the root of your project. The necessary environment variables are:
    - `DATABASE_URL`: URL to connect to the MySQL server and the specific database;
-   - `JWT_SECRET`: secret used to create and verify JWT tokens.
+   - `JWT_SECRET`: secret used to create and verify JWT tokens;
+   - `APP_HOST`: the host on which the app will be available;
+   - `APP_PORT`: the posrt on which the app will be available.
   Example `.env` file:
   ```
   DATABASE_URL="mysql://root:roomless@localhost:3306/bookmarks?schema=public"
   JWT_SECRET="YOUR_JWT_SECRET"
+  APP_HOST="localhost"
+  APP_PORT="3000"
   ```
 4. **Start the database service**:
     From within a terminal run the following command to start the MySQL container:
