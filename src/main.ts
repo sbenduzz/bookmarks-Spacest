@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { AppService } from './app.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -9,6 +10,10 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
-  await app.listen(3000);
+  const port = app.get(AppService).getPort();
+  const host = app.get(AppService).getHost();
+  await app.listen(port, host, () => {
+    console.log(`App is running on ${host}:${port}`);
+  });
 }
 bootstrap();
