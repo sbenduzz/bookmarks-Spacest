@@ -134,6 +134,13 @@ bookmarks-spacest
   - Body: JWT token.
   
 ## Bookmarks 
+In order to call the following APIs you need to obtain the JWT token, which is released by the Signin operation, and include it inside the *Authentication* header of the request in the following form:
+
+```Bearer {token}```
+
+If the token is not inserted, or is not a valid one, the response will be `Unauthorized`. 
+This token has an expiration time, after which you need to re-execute the Signin operation in order to get a fresh one.
+
 ### Get Bookmarks
 - **Endpoint**: ```GET /bookmarks```
 - **Description**: Retrieve bookmarks for the authenticated user, possibly with pagination.
