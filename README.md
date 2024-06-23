@@ -106,5 +106,74 @@ bookmarks-spacest
     ```bash
     npm start
     ```
- 
     
+# API Endpoints
+
+## Authentication 
+
+### Signup
+- **Endpoint**: ```POST /auth/signup```
+- **Description**: Register a new user.
+- **Request Body** (as x-www-form-urlencoded):
+  ```
+  email:user@example.com
+  password:your_password
+  ```
+- **Response**:
+  - Body: User details.
+  
+### Signin
+- **Endpoint**: ```POST /auth/signin```
+- **Description**: Authenticate a user and obtain a JWT token.
+- **Request Body** (as x-www-form-urlencoded):
+  ```
+  email:user@example.com
+  password:your_password
+  ```
+- **Response**:
+  - Body: JWT token.
+  
+## Bookmarks 
+### Get Bookmarks
+- **Endpoint**: ```GET /bookmarks```
+- **Description**: Retrieve bookmarks for the authenticated user, possibly with pagination.
+- **Query Parameters**
+  -`page` (optional): Page number for pagination
+  -`size` (optional): Number of items per page, for pagination
+- **Response**:
+  - Body: List of bookmarks.
+
+### Get Bookmark by ID
+- **Endpoint**: ```GET /bookmarks/:id```
+- **Description**: Retrieve a specific bookmark, belonging to the authenticated user, by its ID.
+- **Response**:
+  - Body: Bookmark details.
+ 
+### Create Bookmark
+- **Endpoint**: ```POST /bookmark/create```
+- **Description**: Create a new bookmark.
+- **Request Body** (as x-www-form-urlencoded) example:
+  ```
+  title:Spacest.com
+  url:https://spacest.com/
+  description(optional):Spacest.com website
+  ```
+- **Response**:
+  - Body: Created bookmark details.
+
+### Update Bookmark
+- **Endpoint**: ```PATCH  /bookmark/:id```
+- **Description**: Update an existing bookmark.
+- **Request Body** (as x-www-form-urlencoded) example:
+  ```
+  description(optional):Spacest.com very cool website
+  ```
+- **Response**:
+  - Body: Updated bookmark details.
+ 
+### Delete Bookmark
+- **Endpoint**: ```DELETE   /bookmark/:id```
+- **Description**: Delete a bookmark by its ID.
+- **Response**:
+  - Body: Deleted bookmark details.
+ 
