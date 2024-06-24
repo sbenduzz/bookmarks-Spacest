@@ -75,16 +75,19 @@ bookmarks-spacest
 ## Instructions for Running the Application
 
 1. **Clone the repository from GitHub**:
+   
    Open a terminal and clone the repository with the following command:
    ```bash
    git clone https://github.com/sbenduzz/bookmarks-spacest
    ```
-2. **Install the application dependencies**:
+3. **Install the application dependencies**:
+   
    From within a terminal run the following command:
    ```bash
    npm install
    ```
-3. **Create the `.env` file**:
+5. **Create the `.env` file**:
+   
    The `.env` file contains environment variables needed for the project. Create a `.env` file in the root of your project. The necessary environment variables are:
    - `DATABASE_URL`: URL to connect to the MySQL server and the specific database;
    - `JWT_SECRET`: secret used to create and verify JWT tokens;
@@ -100,16 +103,19 @@ APP_PORT="3000"
 ```
 
 4. **Start the database service**:
+   
    From within a terminal run the following command to start the MySQL container:
    ```bash
    docker-compose up -d
    ```
-5. **Run the database migrations**:
+6. **Run the database migrations**:
+   
    From within a terminal run the following command to apply the neccesary database migrations:
    ```bash
    npx prisma migrate deploy
    ```
-6. **Run the application**:
+8. **Run the application**:
+   
    From within a terminal run the following command to run the application:
    ```bash
    npm start
@@ -123,7 +129,7 @@ APP_PORT="3000"
 
 - **Endpoint**: `POST /auth/signup`
 - **Description**: Register a new user.
-- **Request Body** (as x-www-form-urlencoded):
+- **Request Body** (as x-www-form-urlencoded) example:
   ```
   email:user@example.com
   password:your_password
@@ -135,7 +141,7 @@ APP_PORT="3000"
 
 - **Endpoint**: `POST /auth/signin`
 - **Description**: Authenticate a user and obtain a JWT token.
-- **Request Body** (as x-www-form-urlencoded):
+- **Request Body** (as x-www-form-urlencoded) example:
   ```
   email:user@example.com
   password:your_password
@@ -156,7 +162,9 @@ This token has an expiration time, after which you need to re-execute the Signin
 
 - **Endpoint**: `GET /bookmarks`
 - **Description**: Retrieve bookmarks for the authenticated user, possibly with pagination.
-- **Query Parameters** -`page` (optional): Page number for pagination -`size` (optional): Number of items per page, for pagination
+- **Query Parameters**:
+  - `page` (optional): Page number for pagination
+  - `size` (optional): Number of items per page, for pagination
 - **Response**:
   - Body: List of bookmarks.
 
