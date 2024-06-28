@@ -82,19 +82,11 @@ export class AuthService {
       email: user.email,
     };
 
-    try {
-      return {
-        access_token: await this.jwt.signAsync(payload, {
-          expiresIn: '10m',
-          secret: this.config.get('JWT_SECRET'),
-        }),
-      };
-    } catch (error) {
-      if (error instanceof PrismaClientInitializationError) {
-        throw new ServiceUnavailableException(
-          'Service is unavailable!',
-        );
-      }
-    }
+    return {
+      access_token: await this.jwt.signAsync(payload, {
+        expiresIn: '10m',
+        secret: this.config.get('JWT_SECRET'),
+      }),
+    };
   }
 }
