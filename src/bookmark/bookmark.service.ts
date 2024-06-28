@@ -133,6 +133,7 @@ export class BookmarkService {
           title: editBookmarkDto.title,
           description: editBookmarkDto.description,
           url: editBookmarkDto.url,
+          updated_at: new Date(),
         },
       });
     } catch (error) {
